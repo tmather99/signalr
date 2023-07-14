@@ -1,4 +1,4 @@
-﻿namespace HealthChecks
+﻿namespace signalr.HealthChecks
 {
     using System.Threading;
     using System.Threading.Tasks;
@@ -9,12 +9,16 @@
     /// </summary>
     public class SignalrHealthCheck : IHealthCheck
     {
+        private readonly ILogger<SignalrHealthCheck> logger;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="SignalrHealthCheck"/> class.
         /// </summary>
+        /// <param name="logger">logger.</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public SignalrHealthCheck()
+        public SignalrHealthCheck(ILogger<SignalrHealthCheck> logger)
         {
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         /// <summary>
@@ -27,10 +31,12 @@
         {
             try
             {
+                logger.LogInformation("SignalR health check passed.");
                 return Task.FromResult(HealthCheckResult.Healthy());
             }
             catch (Exception e)
             {
+                logger.LogError(e.Message);
                 return Task.FromResult(HealthCheckResult.Unhealthy(description: "exception", e));
             }
         }

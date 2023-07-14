@@ -1,10 +1,10 @@
 using System.Reflection;
-using HealthChecks;
 using Microsoft.AspNetCore.SignalR;
 using Serilog;
 using Serilog.Core;
 using Serilog.Formatting.Compact;
 using signalr;
+using signalr.HealthChecks;
 using signalr.Hubs;
 using signalr.Models;
 using signalr.Repositories;
@@ -59,6 +59,8 @@ try
         app.UseHsts();
     }
 
+    // Set Serilog as the default logging provider for the asp.net stack.
+    app.UseSerilogRequestLogging();
     app.UseHealthChecks("/health");
     app.UseHttpsRedirection();
     app.UseStaticFiles();

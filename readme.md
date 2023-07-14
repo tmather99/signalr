@@ -1,7 +1,6 @@
 # CI - KinD
 
     https://dapr.assistdevops.com
-    https://seq.assistdevops.com
     https://zipkin.assistdevops.com
     https://redis.assistdevops.com
     https://rabbitmq.assistdevops.com
@@ -11,6 +10,8 @@
     https://anchorservice.assistdevops.com/swagger
     https://enrollmentservice.assistdevops.com/swagger
     
+    https://seq.assistdevops.com/#/events?autorefresh
+
     https://signalr.assistdevops.com
     https://signalr-1.assistdevops.com
     https://signalr-2.assistdevops.com

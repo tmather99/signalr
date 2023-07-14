@@ -30,6 +30,14 @@ spec:
           limits:
             memory: "128Mi"
             cpu: "200m"  
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 3
+          periodSeconds: 10
+          timeoutSeconds: 1
+          failureThreshold: 3            
         env:
         - name: ASPNETCORE_ENVIRONMENT
           value: "Development"        
