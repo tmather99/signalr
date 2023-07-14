@@ -6,7 +6,7 @@ HARBOR_PROJ     = $(REPO)/jedi
 REPO_TAG        = projects.registry.vmware.com
 HARBOR_PROJ_TAG = $(REPO_TAG)/jedi
 
-.PHONY: ingress
+.PHONY: ingress signalr
 
 #
 # build targets
