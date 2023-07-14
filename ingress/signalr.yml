@@ -1,0 +1,48 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: signalr-ingress  
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+      - signalr.assistdevops.com
+    secretName: signalr-assistdevops-tls   
+  - hosts:
+      - signalr-1.assistdevops.com
+    secretName: signalr-assistdevops-tls   
+  - hosts:
+      - signalr-2.assistdevops.com
+    secretName: signalr-assistdevops-tls   
+  rules:
+  - host: signalr.assistdevops.com
+    http:
+      paths:      
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: signalr-service
+            port: 
+              number: 80  
+  - host: signalr-1.assistdevops.com
+    http:
+      paths:      
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: signalr-1-service
+            port: 
+              number: 80  
+  - host: signalr-2.assistdevops.com
+    http:
+      paths:      
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: signalr-2-service
+            port: 
+              number: 80  
+
