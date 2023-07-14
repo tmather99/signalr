@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ps_globomantics_signalr.Models;
-using ps_globomantics_signalr.Repositories;
 using System.Diagnostics;
+using signalr.Models;
+using signalr.Repositories;
 
-namespace ps_globomantics_signalr.Controllers
+namespace signalr.Controllers
 {
     public class HomeController : Controller
     {

@@ -40,3 +40,6 @@ cd C:\github\ps-globomantics-signalr-itemgroups\ConsoleClient\bin\Debug\net7.0
 .\ConsoleClient.exe https://signalr-staging-blue.assistdevtest.com
 
 
+# Seq http://localhost:5342/#/events?autorefresh
+
+

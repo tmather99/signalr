@@ -1,6 +1,6 @@
-﻿using ps_globomantics_signalr.Models;
+﻿using signalr.Models;
 
-namespace ps_globomantics_signalr.Repositories
+namespace signalr.Repositories
 {
     public interface IAuctionRepo
     {

@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: signalr-2-app
+  name: signalr-app
 spec:
   selector:
     matchLabels:
-      app: signalr-2-app
+      app: signalr-app
   replicas: 1
   template:
     metadata:
       labels:
-        app: signalr-2-app
+        app: signalr-app
       annotations:
         dapr.io/enabled: "true"
-        dapr.io/app-id: "signalr-2"
+        dapr.io/app-id: "signalr"
         dapr.io/app-port: "80"
         dapr.io/app-ssl: "true"
         dapr.io/config: "tracing"
@@ -21,8 +21,8 @@ spec:
         dapr.io/metrics-port: "9090" 
     spec:      
       containers:
-      - name: signalr-2
-        image: harbor-repo.vmware.com/jedi/signalr:v1002
+      - name: signalr
+        image: harbor-repo.vmware.com/jedi/signalr:v1003
         imagePullPolicy: Always
         ports:
         - containerPort: 80
@@ -35,14 +35,16 @@ spec:
           value: "Development"        
         - name: ASPNETCORE_URLS
           value: "http://+:80"
+        - name: SEQ_ENDPOINT
+          value: http://seq-service        
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: signalr-2-service
+  name: signalr-service
 spec:
   selector:
-    app: signalr-2-app  
+    app: signalr-app  
   ports:
     - protocol: TCP 
       port: 80

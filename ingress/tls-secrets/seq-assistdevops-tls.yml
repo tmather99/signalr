@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: seq-assistdevops-tls
+  name: signalr-assistdevops-tls
   namespace: default
 type: kubernetes.io/tls
 data:

@@ -1,4 +1,4 @@
-namespace ps_globomantics_signalr.Models
+namespace signalr.Models
 {
     public class ErrorViewModel
     {

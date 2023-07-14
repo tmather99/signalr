@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using ps_globomantics_signalr.Models;
+using signalr.Models;
 
-namespace ps_globomantics_signalr.Hubs
+namespace signalr.Hubs
 {
     public class AuctionHub: Hub
     {

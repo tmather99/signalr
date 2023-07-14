@@ -1,57 +1,87 @@
+using System.Reflection;
 using HealthChecks;
 using Microsoft.AspNetCore.SignalR;
-using ps_globomantics_signalr.Hubs;
-using ps_globomantics_signalr.Models;
-using ps_globomantics_signalr.Repositories;
+using Serilog;
+using Serilog.Core;
+using Serilog.Formatting.Compact;
+using signalr;
+using signalr.Hubs;
+using signalr.Models;
+using signalr.Repositories;
+using signalr.SerilogExtensions;
 
-var builder = WebApplication.CreateBuilder(args);
+LoggingLevelSwitch loggingLevelSwitch = new LoggingLevelSwitch(Serilog.Events.LogEventLevel.Information);
 
-// Add services to the container.
-builder.Services.AddControllersWithViews();
-builder.Services.AddSignalR(o => o.EnableDetailedErrors = true);
-builder.Services.AddSingleton<IAuctionRepo, AuctionMemoryRepo>();
+// Bootstrap logger, will capture any crashes and log it until the initialization is completed.
+Log.Logger = new LoggerConfiguration()
+    .Enrich.FromLogContext()
+    .WriteTo.Console(new CompactJsonFormatter())
+    .CreateBootstrapLogger();
 
-builder.Services.AddHealthChecks().AddCheck<SignalrHealthCheck>("Redis");
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+try
 {
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    var entryAssembly = Assembly.GetEntryAssembly();
+    var builder = WebApplication.CreateBuilder(args);
+
+    // Add services to the container.
+    builder.Services.AddControllersWithViews();
+    builder.Services.AddSignalR(o => o.EnableDetailedErrors = true);
+    builder.Services.AddSingleton<IAuctionRepo, AuctionMemoryRepo>();
+    builder.Services.AddHostedService<HostedService>();
+    builder.Services.AddHealthChecks().AddCheck<SignalrHealthCheck>("SignalR");
+
+    var seqEndpoint = builder.Configuration["SEQ_ENDPOINT"] ?? "http://localhost:5342";
+
+    builder.Host.UseSerilog((context, config) =>
+        {
+            config.Enrich.With<TraceIdEnricher>();
+            config.MinimumLevel.ControlledBy(loggingLevelSwitch);
+            config.ReadFrom.Configuration(context.Configuration);
+            config.WriteTo.Console(new CompactJsonFormatter());
+            config.WriteTo.Seq(seqEndpoint);
+        },
+        preserveStaticLogger: false,
+        writeToProviders: false);
+
+    var app = builder.Build();
+
+    // Get the entry assembly title and version.
+    var appName = entryAssembly?.GetCustomAttribute<AssemblyTitleAttribute>()?.Title ?? "missing title";
+    var versionNumber = entryAssembly?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.ToString() ?? "missing version";
+
+    Log.Logger.Information("{appName} version {versionNumber} is starting.", appName, versionNumber);
+
+    // Configure the HTTP request pipeline.
+    if (!app.Environment.IsDevelopment())
+    {
+        app.UseExceptionHandler("/Home/Error");
+        // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+        app.UseHsts();
+    }
+
+    app.UseHealthChecks("/health");
+    app.UseHttpsRedirection();
+    app.UseStaticFiles();
+    app.UseRouting();
+    app.UseAuthorization();
+    
+    app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
+    app.MapGet("/auctions", (IAuctionRepo auctionRepo) => { return auctionRepo.GetAll(); });
+    app.MapPost("auction/{auctionId}/newbid", (int auctionId, int currentBid, IAuctionRepo auctionRepo) => { auctionRepo.NewBid(auctionId, currentBid); });
+    app.MapPost("auction", (Auction auction, IAuctionRepo auctionRepo, IHubContext<AuctionHub> hubContext) =>
+    {
+        auctionRepo.AddAuction(auction);
+        hubContext.Clients.All.SendAsync("ReceiveNewAuction", auction);
+    });
+
+    app.MapHub<AuctionHub>("/auctionHub");
+    app.Run();
 }
-
-app.UseHealthChecks("/health");
-
-app.UseHttpsRedirection();
-app.UseStaticFiles();
-
-app.UseRouting();
-
-app.UseAuthorization();
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
-
-app.MapGet("/auctions", (IAuctionRepo auctionRepo) =>
+catch (Exception ex)
 {
-    return auctionRepo.GetAll();
-});
-
-app.MapPost("auction/{auctionId}/newbid", (int auctionId, int currentBid, IAuctionRepo auctionRepo) =>
+    Log.Fatal(ex, "An unhandled exception occurred during startup.");
+}
+finally
 {
-    auctionRepo.NewBid(auctionId, currentBid);
-});
-
-app.MapPost("auction", (Auction auction, IAuctionRepo auctionRepo, IHubContext<AuctionHub> hubContext) =>
-{
-    auctionRepo.AddAuction(auction);
-    hubContext.Clients.All.SendAsync("ReceiveNewAuction", auction);
-});
-
-app.MapHub<AuctionHub>("/auctionHub");
-
-app.Run();
+    Log.CloseAndFlushAsync();
+}

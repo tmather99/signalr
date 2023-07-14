@@ -59,22 +59,32 @@ rm-nginx-kind:
 	
 secrets:
 	kubectl apply -f ingress/tls-secrets/signalr-assistdevops-tls.yml	
+	kubectl apply -f ingress/tls-secrets/seq-assistdevops-tls.yml	
 
 rm-secrets:
 	kubectl delete -f ingress/tls-secrets/signalr-assistdevops-tls.yml	
+	kubectl delete -f ingress/tls-secrets/seq-assistdevops-tls.yml	
 
 ingress:
+	kubectl apply -f ingress/seq.yml	
 	kubectl apply -f ingress/signalr.yml	
 
 rm-ingress:
+	kubectl delete -f ingress/seq.yml	
 	kubectl delete -f ingress/signalr.yml	
 
+seq:
+	kubectl apply -f deploy/seq.yml
+
+rm-seq:
+	kubectl delete -f deploy/seq.yml
+
 signalr:
-	kubectl apply -f signalr.yml	
-	kubectl apply -f signalr-1.yml	
-	kubectl apply -f signalr-2.yml	
+	kubectl apply -f deploy/signalr.yml	
+	kubectl apply -f deploy/signalr-1.yml	
+	kubectl apply -f deploy/signalr-2.yml	
 
 rm-signalr:
-	kubectl delete -f signalr.yml	
-	kubectl delete -f signalr-1.yml	
-	kubectl delete -f signalr-2.yml	
+	kubectl delete -f deploy/signalr.yml	
+	kubectl delete -f deploy/signalr-1.yml	
+	kubectl delete -f deploy/signalr-2.yml	
