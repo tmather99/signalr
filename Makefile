@@ -12,7 +12,7 @@ HARBOR_PROJ_TAG = $(REPO_TAG)/jedi
 # build targets
 #
 build:
-	docker build -t $(HARBOR_PROJ)/signalr:$(TAG) -f  ./ps-globomantics-signalr/Dockerfile .
+	docker build -t $(HARBOR_PROJ)/signalr:$(TAG) -f  ./signalr/Dockerfile .
 
 tag:
 	docker tag $(HARBOR_PROJ)/signalr:$(TAG) $(HARBOR_PROJ_TAG)/signalr:$(TAG)
